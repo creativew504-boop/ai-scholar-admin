@@ -8,9 +8,10 @@ import {
   Shield, AlertTriangle, Zap, GripVertical, X, Filter,
   Terminal, Copy, RotateCcw, Sparkles, Folder, File,
   Play as PlayIcon, Square, Minus, Plus, Monitor,
-  User, LogOut, Settings as SettingsIcon, BookMarked
+  User, LogOut, Settings as SettingsIcon, BookMarked, Menu, Layers
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // ─── Types ───────────────────────────────────────────────────────
 type LayoutMode = "course" | "ide" | "notes";
@@ -99,11 +100,15 @@ export default Counter;`;
 
 // ─── Component ───────────────────────────────────────────────────
 export default function VideoPlayer() {
+  const isMobile = useIsMobile();
+
   // Layout
   const [mode, setMode] = useState<LayoutMode>("ide");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
+  const [mobilePanel, setMobilePanel] = useState<"video" | "editor" | "lessons">("video");
+  const [mobileLessonsOpen, setMobileLessonsOpen] = useState(false);
 
   // Video
   const [playing, setPlaying] = useState(false);
@@ -138,18 +143,19 @@ export default function VideoPlayer() {
   // Notes
   const [notesContent, setNotesContent] = useState("# My Course Notes\n\n- React hooks simplify state management\n- useEffect handles side effects\n- Custom hooks promote reusability\n");
 
-  // Drag resize
+  // Drag resize (desktop only)
   const dragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(45);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (isMobile) return;
     dragging.current = true;
     startX.current = e.clientX;
     startWidth.current = editorWidth;
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
-  }, [editorWidth]);
+  }, [editorWidth, isMobile]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -210,48 +216,48 @@ export default function VideoPlayer() {
     return (
       <div className="min-h-screen bg-[#0a0e14] text-gray-100 font-sans">
         {/* Help Navbar */}
-        <nav className={cn("sticky top-0 z-50 h-14 px-6 flex items-center gap-4", glass, glassBg)}>
+        <nav className={cn("sticky top-0 z-50 h-14 px-4 md:px-6 flex items-center gap-4", glass, glassBg)}>
           <button onClick={() => setShowHelp(false)} className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors">
             <ChevronLeft className="w-4 h-4" />
-            <span className="text-sm font-medium">Back to Learning</span>
+            <span className="text-sm font-medium">Back</span>
           </button>
           <div className="flex-1" />
           <HelpCircle className="w-5 h-5 text-blue-400" />
           <span className="text-sm font-semibold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Help Center</span>
         </nav>
 
-        <div className="max-w-6xl mx-auto px-6 py-10">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-10">
           {/* Search */}
-          <div className="text-center mb-12">
-            <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">How can we help?</h1>
-            <p className="text-gray-400 text-sm mb-6">Search our knowledge base or browse categories below</p>
+          <div className="text-center mb-8 md:mb-12">
+            <h1 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">How can we help?</h1>
+            <p className="text-gray-400 text-sm mb-4 md:mb-6">Search our knowledge base or browse categories</p>
             <div className={cn("max-w-xl mx-auto relative", glass, "bg-[#161b22]/80 rounded-2xl")}>
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               <input
                 value={helpSearch}
                 onChange={(e) => setHelpSearch(e.target.value)}
-                placeholder="Search articles, FAQs, guides..."
-                className="w-full h-12 pl-11 pr-4 bg-transparent text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none rounded-2xl"
+                placeholder="Search articles, FAQs..."
+                className="w-full h-11 md:h-12 pl-11 pr-4 bg-transparent text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none rounded-2xl"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
             {/* Left: Categories + Articles */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-2 space-y-6 md:space-y-8">
               {!helpCategory ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                   {helpCategories.map((cat) => (
                     <button
                       key={cat.key}
                       onClick={() => setHelpCategory(cat.key as HelpCategory)}
-                      className={cn("p-5 rounded-2xl text-left group transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/5", cardBg, cardBorder)}
+                      className={cn("p-4 md:p-5 rounded-2xl text-left group transition-all duration-300 active:scale-95 md:hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/5", cardBg, cardBorder)}
                     >
-                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-gradient-to-br", cat.color)}>
-                        <cat.icon className="w-5 h-5 text-white" />
+                      <div className={cn("w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center mb-2 md:mb-3 bg-gradient-to-br", cat.color)}>
+                        <cat.icon className="w-4 h-4 md:w-5 md:h-5 text-white" />
                       </div>
-                      <h3 className="font-semibold text-sm text-gray-100">{cat.title}</h3>
-                      <p className="text-xs text-gray-500 mt-1">{cat.desc}</p>
+                      <h3 className="font-semibold text-xs md:text-sm text-gray-100">{cat.title}</h3>
+                      <p className="text-[10px] md:text-xs text-gray-500 mt-1">{cat.desc}</p>
                     </button>
                   ))}
                 </div>
@@ -261,14 +267,13 @@ export default function VideoPlayer() {
                     <ChevronLeft className="w-3 h-3" />
                     All Categories
                   </button>
-                  {/* Article view */}
-                  <div className={cn("p-6 rounded-2xl", cardBg, cardBorder)}>
-                    <div className="flex items-center gap-2 mb-4">
+                  <div className={cn("p-4 md:p-6 rounded-2xl", cardBg, cardBorder)}>
+                    <div className="flex items-center gap-2 mb-4 flex-wrap">
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/20 text-blue-400">Guide</span>
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-purple-500/20 text-purple-400">{helpCategory}</span>
                       <span className="text-[10px] text-gray-500 ml-auto">Updated 2 days ago</span>
                     </div>
-                    <h2 className="text-lg font-bold text-gray-100 mb-3">Getting Started with {helpCategories.find(c => c.key === helpCategory)?.title}</h2>
+                    <h2 className="text-base md:text-lg font-bold text-gray-100 mb-3">Getting Started with {helpCategories.find(c => c.key === helpCategory)?.title}</h2>
                     <div className="text-sm text-gray-400 space-y-3 leading-relaxed">
                       <p>Welcome to AIScholar's {helpCategory} support. Here you'll find everything you need to manage your {helpCategory} settings and resolve common issues.</p>
                       <p>Our platform is designed to be intuitive, but we understand that questions can arise. Browse the FAQ section or contact our support team for personalized assistance.</p>
@@ -280,18 +285,19 @@ export default function VideoPlayer() {
                         <li>Save your changes</li>
                       </ol>
                     </div>
-                    {/* Feedback */}
-                    <div className={cn("mt-6 p-4 rounded-xl flex items-center gap-4", "bg-white/[0.03]", "border border-white/[0.04]")}>
+                    <div className={cn("mt-6 p-3 md:p-4 rounded-xl flex items-center gap-3 md:gap-4 flex-wrap", "bg-white/[0.03]", "border border-white/[0.04]")}>
                       <span className="text-sm text-gray-400">Was this helpful?</span>
-                      <button className="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-medium hover:bg-emerald-500/30 transition-colors">👍 Yes</button>
-                      <button className="px-3 py-1.5 rounded-lg bg-rose-500/20 text-rose-400 text-xs font-medium hover:bg-rose-500/30 transition-colors">👎 No</button>
+                      <div className="flex gap-2">
+                        <button className="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-medium hover:bg-emerald-500/30 active:scale-95 transition-all">👍 Yes</button>
+                        <button className="px-3 py-1.5 rounded-lg bg-rose-500/20 text-rose-400 text-xs font-medium hover:bg-rose-500/30 active:scale-95 transition-all">👎 No</button>
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
 
               {/* Contact Section */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
                 {[
                   { icon: MessageSquare, title: "Live Chat", desc: "Chat with us now", action: "Start Chat", color: "from-blue-500 to-cyan-500" },
                   { icon: Mail, title: "Email Support", desc: "support@aischolar.io", action: "Send Email", color: "from-violet-500 to-purple-500" },
@@ -300,7 +306,7 @@ export default function VideoPlayer() {
                   <button
                     key={item.title}
                     onClick={() => item.title === "Submit Ticket" && setShowTicketForm(true)}
-                    className={cn("p-5 rounded-2xl text-left transition-all duration-300 hover:scale-[1.02]", cardBg, cardBorder)}
+                    className={cn("p-4 md:p-5 rounded-2xl text-left transition-all duration-300 active:scale-95 md:hover:scale-[1.02]", cardBg, cardBorder)}
                   >
                     <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center mb-3 bg-gradient-to-br", item.color)}>
                       <item.icon className="w-4 h-4 text-white" />
@@ -314,33 +320,33 @@ export default function VideoPlayer() {
 
               {/* Ticket Form */}
               {showTicketForm && (
-                <div className={cn("p-6 rounded-2xl space-y-4", cardBg, cardBorder)}>
+                <div className={cn("p-4 md:p-6 rounded-2xl space-y-4", cardBg, cardBorder)}>
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold">Submit a Ticket</h3>
-                    <button onClick={() => setShowTicketForm(false)} className="text-gray-500 hover:text-gray-300"><X className="w-4 h-4" /></button>
+                    <button onClick={() => setShowTicketForm(false)} className="text-gray-500 hover:text-gray-300 p-1"><X className="w-4 h-4" /></button>
                   </div>
-                  <input placeholder="Subject" className="w-full h-10 px-4 rounded-xl bg-white/[0.04] border border-white/[0.06] text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50" />
-                  <select className="w-full h-10 px-4 rounded-xl bg-white/[0.04] border border-white/[0.06] text-sm text-gray-400 focus:outline-none">
+                  <input placeholder="Subject" className="w-full h-11 px-4 rounded-xl bg-white/[0.04] border border-white/[0.06] text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50" />
+                  <select className="w-full h-11 px-4 rounded-xl bg-white/[0.04] border border-white/[0.06] text-sm text-gray-400 focus:outline-none">
                     <option>Select Category</option>
                     {helpCategories.map((c) => <option key={c.key}>{c.title}</option>)}
                   </select>
                   <textarea rows={4} placeholder="Describe your issue..." className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.06] text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 resize-none" />
-                  <button className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity">Submit Ticket</button>
+                  <button className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm font-semibold hover:opacity-90 active:scale-95 transition-all">Submit Ticket</button>
                 </div>
               )}
             </div>
 
             {/* Right: FAQ Sidebar */}
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               <h3 className="font-semibold text-sm text-gray-300">Frequently Asked</h3>
               {faqs.map((faq, i) => (
                 <button
                   key={i}
                   onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
-                  className={cn("w-full p-4 rounded-xl text-left transition-all duration-200", cardBg, cardBorder, expandedFaq === i && "ring-1 ring-blue-500/30")}
+                  className={cn("w-full p-3 md:p-4 rounded-xl text-left transition-all duration-200", cardBg, cardBorder, expandedFaq === i && "ring-1 ring-blue-500/30")}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-200 font-medium pr-2">{faq.q}</span>
+                    <span className="text-xs md:text-sm text-gray-200 font-medium pr-2">{faq.q}</span>
                     <ChevronDown className={cn("w-3.5 h-3.5 text-gray-500 flex-shrink-0 transition-transform", expandedFaq === i && "rotate-180")} />
                   </div>
                   {expandedFaq === i && <p className="text-xs text-gray-400 mt-3 leading-relaxed">{faq.a}</p>}
@@ -355,12 +361,12 @@ export default function VideoPlayer() {
 
   // ─── MAIN LMS INTERFACE ──────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#0a0e14] text-gray-100 font-sans flex flex-col overflow-hidden">
+    <div className="h-screen bg-[#0a0e14] text-gray-100 font-sans flex flex-col overflow-hidden">
       {/* ── NAVBAR ──────────────────────────────────────────────── */}
-      <nav className={cn("relative z-50 h-12 px-4 flex items-center gap-3 flex-shrink-0", glass, glassBg)}>
+      <nav className={cn("relative z-50 h-12 px-3 md:px-4 flex items-center gap-2 md:gap-3 flex-shrink-0", glass, glassBg)}>
         {/* Logo */}
-        <div className="flex items-center gap-2 mr-4">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+        <div className="flex items-center gap-1.5 md:gap-2 mr-2 md:mr-4">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
             <Brain className="w-4 h-4 text-white" />
           </div>
           <span className="text-sm font-bold tracking-tight hidden sm:block">
@@ -375,9 +381,9 @@ export default function VideoPlayer() {
           {(["course", "ide", "notes"] as LayoutMode[]).map((m) => (
             <button
               key={m}
-              onClick={() => setMode(m)}
+              onClick={() => { setMode(m); if (isMobile) setMobilePanel("video"); }}
               className={cn(
-                "px-3 rounded-lg text-xs font-medium transition-all duration-300 flex items-center gap-1.5",
+                "px-2 md:px-3 rounded-lg text-xs font-medium transition-all duration-300 flex items-center gap-1 md:gap-1.5",
                 mode === m ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-400 shadow-sm shadow-blue-500/10" : "text-gray-500 hover:text-gray-300"
               )}
             >
@@ -389,7 +395,7 @@ export default function VideoPlayer() {
           ))}
         </div>
 
-        {/* Search */}
+        {/* Search - desktop only */}
         <div className={cn("flex-1 max-w-xs relative hidden md:block")}>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
           <input
@@ -402,11 +408,15 @@ export default function VideoPlayer() {
         <div className="flex-1" />
 
         {/* Right Actions */}
-        <div className="flex items-center gap-1.5">
-          <button onClick={() => setShowHelp(true)} className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-500 hover:text-gray-300 hover:bg-white/[0.04] transition-all">
+        <div className="flex items-center gap-1">
+          {/* Search - mobile */}
+          <button className="md:hidden w-8 h-8 rounded-xl flex items-center justify-center text-gray-500 hover:text-gray-300 hover:bg-white/[0.04] transition-all">
+            <Search className="w-4 h-4" />
+          </button>
+          <button onClick={() => setShowHelp(true)} className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-500 hover:text-gray-300 hover:bg-white/[0.04] transition-all hidden sm:flex">
             <HelpCircle className="w-4 h-4" />
           </button>
-          <button onClick={() => setDarkMode(!darkMode)} className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-500 hover:text-gray-300 hover:bg-white/[0.04] transition-all">
+          <button onClick={() => setDarkMode(!darkMode)} className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-500 hover:text-gray-300 hover:bg-white/[0.04] transition-all hidden sm:flex">
             {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
 
@@ -419,18 +429,22 @@ export default function VideoPlayer() {
               )}
             </button>
             {showNotifs && (
-              <div className={cn("absolute right-0 top-full mt-2 w-80 rounded-2xl overflow-hidden shadow-2xl shadow-black/40 z-50 animate-scale-in", glass, "bg-[#0d1117]/95")}>
-                <div className="p-4 border-b border-white/[0.06]">
+              <div className={cn(
+                "absolute top-full mt-2 rounded-2xl overflow-hidden shadow-2xl shadow-black/40 z-50 animate-scale-in",
+                glass, "bg-[#0d1117]/95",
+                isMobile ? "fixed left-3 right-3 top-14 w-auto" : "right-0 w-80"
+              )}>
+                <div className="p-3 md:p-4 border-b border-white/[0.06]">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-semibold">Notifications</h3>
                     <button onClick={markAllRead} className="text-[10px] text-blue-400 hover:text-blue-300 transition-colors">Mark All Read</button>
                   </div>
-                  <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-none">
+                  <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
                     {(["all", "courses", "system", "payments", "certificates", "messages"] as NotifFilter[]).map((f) => (
                       <button
                         key={f}
                         onClick={() => setNotifFilter(f)}
-                        className={cn("px-2.5 py-1 rounded-lg text-[10px] font-medium whitespace-nowrap transition-all",
+                        className={cn("px-2.5 py-1.5 rounded-lg text-[10px] font-medium whitespace-nowrap transition-all",
                           notifFilter === f ? "bg-blue-500/20 text-blue-400" : "text-gray-500 hover:text-gray-300"
                         )}
                       >
@@ -441,7 +455,7 @@ export default function VideoPlayer() {
                 </div>
                 <div className="max-h-72 overflow-y-auto">
                   {filteredNotifs.map((n) => (
-                    <div key={n.id} className={cn("px-4 py-3 flex gap-3 hover:bg-white/[0.02] transition-colors border-b border-white/[0.03] last:border-0", !n.read && "bg-blue-500/[0.03]")}>
+                    <div key={n.id} className={cn("px-3 md:px-4 py-3 flex gap-3 hover:bg-white/[0.02] active:bg-white/[0.04] transition-colors border-b border-white/[0.03] last:border-0", !n.read && "bg-blue-500/[0.03]")}>
                       <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0", !n.read ? "bg-blue-500/20 text-blue-400" : "bg-white/[0.04] text-gray-500")}>
                         <n.icon className="w-3.5 h-3.5" />
                       </div>
@@ -472,17 +486,26 @@ export default function VideoPlayer() {
               A
             </button>
             {showUserMenu && (
-              <div className={cn("absolute right-0 top-full mt-2 w-48 rounded-2xl overflow-hidden shadow-2xl shadow-black/40 z-50 animate-scale-in py-1", glass, "bg-[#0d1117]/95")}>
+              <div className={cn(
+                "absolute top-full mt-2 rounded-2xl overflow-hidden shadow-2xl shadow-black/40 z-50 animate-scale-in py-1",
+                glass, "bg-[#0d1117]/95",
+                isMobile ? "right-0 w-44" : "right-0 w-48"
+              )}>
                 <div className="px-4 py-3 border-b border-white/[0.06]">
                   <p className="text-sm font-semibold">Admin Chief</p>
                   <p className="text-[10px] text-gray-500">admin@aischolar.io</p>
                 </div>
                 {[
                   { icon: User, label: "Profile" },
-                  { icon: SettingsIcon, label: "Account Settings" },
+                  { icon: SettingsIcon, label: "Settings" },
                   { icon: BookMarked, label: "My Courses" },
+                  ...(isMobile ? [{ icon: HelpCircle, label: "Help Center" }] : []),
                 ].map((item) => (
-                  <button key={item.label} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/[0.04] transition-colors">
+                  <button
+                    key={item.label}
+                    onClick={() => { if (item.label === "Help Center") { setShowHelp(true); setShowUserMenu(false); } }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/[0.04] active:bg-white/[0.06] transition-colors"
+                  >
                     <item.icon className="w-3.5 h-3.5 text-gray-500" />
                     {item.label}
                   </button>
@@ -502,10 +525,76 @@ export default function VideoPlayer() {
       {/* Click-away */}
       {(showNotifs || showUserMenu) && <div className="fixed inset-0 z-40" onClick={() => { setShowNotifs(false); setShowUserMenu(false); }} />}
 
+      {/* ── MOBILE PANEL SWITCHER (IDE mode) ────────────────────── */}
+      {isMobile && mode === "ide" && (
+        <div className={cn("flex h-10 border-b border-white/[0.06] flex-shrink-0", glassBg)}>
+          {([
+            { key: "video", icon: Play, label: "Video" },
+            { key: "editor", icon: Code2, label: "Editor" },
+            { key: "lessons", icon: Layers, label: "Lessons" },
+          ] as const).map((p) => (
+            <button
+              key={p.key}
+              onClick={() => setMobilePanel(p.key)}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 text-xs font-medium transition-all relative",
+                mobilePanel === p.key ? "text-blue-400" : "text-gray-500"
+              )}
+            >
+              <p.icon className="w-3.5 h-3.5" />
+              {p.label}
+              {mobilePanel === p.key && <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── MOBILE LESSONS DRAWER ───────────────────────────────── */}
+      {isMobile && mobileLessonsOpen && mode === "course" && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/60" onClick={() => setMobileLessonsOpen(false)} />
+          <div className={cn("fixed bottom-0 left-0 right-0 z-50 max-h-[70vh] rounded-t-2xl flex flex-col animate-slide-in-right", glassBg, glass)}>
+            <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">
+              <div>
+                <h2 className="text-sm font-bold text-gray-200">React Masterclass</h2>
+                <p className="text-[10px] text-gray-500 mt-0.5">8 lessons • 2h 25m</p>
+              </div>
+              <button onClick={() => setMobileLessonsOpen(false)} className="w-8 h-8 rounded-xl flex items-center justify-center bg-white/[0.04]">
+                <X className="w-4 h-4 text-gray-400" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2">
+              {lessons.map((lesson) => (
+                <button
+                  key={lesson.id}
+                  onClick={() => { if (!lesson.locked) { setActiveLesson(lesson.id); setMobileLessonsOpen(false); } }}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-left transition-all duration-200",
+                    activeLesson === lesson.id ? "bg-blue-500/10 border border-blue-500/20" : "active:bg-white/[0.04]",
+                    lesson.locked && "opacity-40 cursor-not-allowed"
+                  )}
+                >
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold",
+                    lesson.completed ? "bg-emerald-500/20 text-emerald-400" : activeLesson === lesson.id ? "bg-blue-500/20 text-blue-400" : "bg-white/[0.04] text-gray-500"
+                  )}>
+                    {lesson.completed ? <Check className="w-4 h-4" /> : lesson.locked ? <Lock className="w-3.5 h-3.5" /> : lesson.id}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={cn("text-sm font-medium truncate", activeLesson === lesson.id ? "text-blue-400" : "text-gray-300")}>{lesson.title}</p>
+                    <span className="text-[10px] text-gray-600">{lesson.duration}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
       {/* ── MAIN CONTENT ───────────────────────────────────────── */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Course Sidebar (course mode) */}
-        {mode === "course" && sidebarOpen && (
+      <div className={cn("flex-1 flex overflow-hidden", isMobile && "flex-col")}>
+
+        {/* Course Sidebar - desktop only */}
+        {!isMobile && mode === "course" && sidebarOpen && (
           <div className={cn("w-64 flex-shrink-0 flex flex-col border-r border-white/[0.06] transition-all duration-300", glassBg)}>
             <div className="p-4 border-b border-white/[0.06]">
               <h2 className="text-sm font-bold text-gray-200">React Masterclass</h2>
@@ -541,8 +630,8 @@ export default function VideoPlayer() {
           </div>
         )}
 
-        {/* Notes Mode */}
-        {mode === "notes" && (
+        {/* Notes Sidebar - desktop only */}
+        {!isMobile && mode === "notes" && (
           <div className={cn("w-72 flex-shrink-0 flex flex-col border-r border-white/[0.06]", glassBg)}>
             <div className="p-4 border-b border-white/[0.06]">
               <h3 className="text-sm font-semibold text-gray-200">📝 Course Notes</h3>
@@ -557,121 +646,163 @@ export default function VideoPlayer() {
           </div>
         )}
 
-        {/* Video Area */}
-        <div className={cn("flex flex-col transition-all duration-300", mode === "ide" ? "flex-1" : mode === "notes" ? "flex-1" : "flex-1")}
-          style={mode === "ide" ? { width: `${100 - editorWidth}%`, flexShrink: 0, flexGrow: 0 } : undefined}
-        >
-          {/* Video Player */}
-          <div className="relative bg-black flex-1 min-h-0 flex items-center justify-center group">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-black to-purple-900/20" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mx-auto mb-4 hover:bg-white/20 transition-all duration-300 cursor-pointer hover:scale-110 group/play"
-                  onClick={() => setPlaying(!playing)}
-                >
-                  {playing ? <Pause className="w-8 h-8 text-white" /> : <Play className="w-8 h-8 text-white ml-1" />}
-                </div>
-                <h3 className="text-white font-semibold text-sm">{lessons[activeLesson]?.title || "Select a lesson"}</h3>
-                <div className="flex items-center gap-2 justify-center mt-2">
-                  <span className="px-2 py-0.5 rounded text-[9px] font-medium bg-blue-500/20 text-blue-400">HD 1080p</span>
-                  <span className="px-2 py-0.5 rounded text-[9px] font-medium bg-purple-500/20 text-purple-400">React</span>
-                </div>
-              </div>
-            </div>
-            {/* Controls */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="h-1 rounded-full bg-white/20 mb-3 cursor-pointer group/progress relative" onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                setProgress(((e.clientX - rect.left) / rect.width) * 100);
-              }}>
-                <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500 relative transition-all" style={{ width: `${progress}%` }}>
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white shadow-lg shadow-blue-500/50 opacity-0 group-hover/progress:opacity-100 transition-opacity" />
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <button className="text-white/70 hover:text-white transition-colors"><SkipBack className="w-4 h-4" /></button>
-                <button onClick={() => setPlaying(!playing)} className="text-white hover:scale-110 transition-transform">
-                  {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                </button>
-                <button className="text-white/70 hover:text-white transition-colors"><SkipForward className="w-4 h-4" /></button>
-                <button onClick={() => setMuted(!muted)} className="text-white/70 hover:text-white transition-colors">
-                  {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                </button>
-                <span className="text-[10px] text-white/50 font-mono">{Math.floor(progress * 0.22)}:00 / 22:10</span>
-                <div className="flex-1" />
-                <button className="text-white/70 hover:text-white transition-colors"><Settings className="w-4 h-4" /></button>
-                <button className="text-white/70 hover:text-white transition-colors"><Maximize className="w-4 h-4" /></button>
-              </div>
-            </div>
-          </div>
-
-          {/* Tabs below video */}
-          <div className={cn("border-t border-white/[0.06]", glassBg)}>
-            <div className="flex gap-0 px-4 border-b border-white/[0.06]">
-              {(["overview", "notes", "resources", "discussion"] as NavTab[]).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setNavTab(tab)}
-                  className={cn("px-4 py-2.5 text-xs font-medium transition-all relative",
-                    navTab === tab ? "text-blue-400" : "text-gray-500 hover:text-gray-300"
-                  )}
-                >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  {navTab === tab && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />}
-                </button>
-              ))}
-              {mode !== "course" && (
-                <button onClick={() => setSidebarOpen(!sidebarOpen)} className="ml-auto text-gray-500 hover:text-gray-300 text-xs flex items-center gap-1">
-                  {sidebarOpen ? <ChevronLeft className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                  Lessons
-                </button>
-              )}
-            </div>
-            <div className="p-4 max-h-32 overflow-y-auto text-xs text-gray-400">
-              {navTab === "overview" && <p>Master React Hooks from the ground up. This comprehensive module covers useState, useEffect, useContext, useReducer, and custom hooks with real-world projects.</p>}
-              {navTab === "notes" && <textarea value={notesContent} onChange={(e) => setNotesContent(e.target.value)} className="w-full h-20 bg-transparent text-gray-300 focus:outline-none resize-none font-mono" placeholder="Take notes..." />}
-              {navTab === "resources" && (
-                <div className="space-y-2">
-                  {["Lecture Slides.pdf", "Code Samples.zip", "Cheat Sheet.md"].map((f) => (
-                    <div key={f} className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer transition-colors">
-                      <Download className="w-3 h-3 text-blue-400" />
-                      <span className="text-gray-300">{f}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {navTab === "discussion" && (
-                <div className="space-y-2">
-                  <div className="flex gap-2 items-start p-2 rounded-lg bg-white/[0.02]">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-[9px] text-white font-bold flex-shrink-0">J</div>
-                    <div>
-                      <span className="text-gray-200 font-medium">Jane</span>
-                      <p className="text-gray-500 mt-0.5">Great explanation of useEffect cleanup!</p>
-                    </div>
+        {/* Video Area - shown on desktop always, mobile conditionally */}
+        {(!isMobile || mobilePanel === "video" || mode !== "ide") && (
+          <div
+            className={cn("flex flex-col transition-all duration-300", isMobile ? "flex-1" : "flex-1")}
+            style={!isMobile && mode === "ide" ? { width: `${100 - editorWidth}%`, flexShrink: 0, flexGrow: 0 } : undefined}
+          >
+            {/* Video Player */}
+            <div className={cn("relative bg-black flex items-center justify-center group", isMobile ? "aspect-video flex-shrink-0" : "flex-1 min-h-0")}>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-black to-purple-900/20" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div
+                    className={cn("rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mx-auto mb-3 md:mb-4 cursor-pointer active:scale-95 md:hover:scale-110 transition-all duration-300",
+                      isMobile ? "w-14 h-14" : "w-20 h-20"
+                    )}
+                    onClick={() => setPlaying(!playing)}
+                  >
+                    {playing ? <Pause className={cn(isMobile ? "w-6 h-6" : "w-8 h-8", "text-white")} /> : <Play className={cn(isMobile ? "w-6 h-6" : "w-8 h-8", "text-white ml-1")} />}
+                  </div>
+                  <h3 className="text-white font-semibold text-xs md:text-sm">{lessons[activeLesson]?.title || "Select a lesson"}</h3>
+                  <div className="flex items-center gap-2 justify-center mt-1.5 md:mt-2">
+                    <span className="px-2 py-0.5 rounded text-[9px] font-medium bg-blue-500/20 text-blue-400">HD 1080p</span>
+                    <span className="px-2 py-0.5 rounded text-[9px] font-medium bg-purple-500/20 text-purple-400">React</span>
                   </div>
                 </div>
-              )}
+              </div>
+              {/* Controls - always visible on mobile, hover on desktop */}
+              <div className={cn("absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 md:p-4 transition-opacity duration-300",
+                isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+              )}>
+                <div className={cn("rounded-full bg-white/20 mb-2 md:mb-3 cursor-pointer group/progress relative", isMobile ? "h-1.5" : "h-1")} onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setProgress(((e.clientX - rect.left) / rect.width) * 100);
+                }}>
+                  <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500 relative transition-all" style={{ width: `${progress}%` }}>
+                    <div className={cn("absolute right-0 top-1/2 -translate-y-1/2 rounded-full bg-white shadow-lg shadow-blue-500/50",
+                      isMobile ? "w-4 h-4" : "w-3 h-3 opacity-0 group-hover/progress:opacity-100"
+                    )} />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 md:gap-3">
+                  <button className="text-white/70 hover:text-white transition-colors p-1"><SkipBack className="w-4 h-4" /></button>
+                  <button onClick={() => setPlaying(!playing)} className="text-white hover:scale-110 active:scale-95 transition-transform p-1">
+                    {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                  </button>
+                  <button className="text-white/70 hover:text-white transition-colors p-1"><SkipForward className="w-4 h-4" /></button>
+                  <button onClick={() => setMuted(!muted)} className="text-white/70 hover:text-white transition-colors p-1">
+                    {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  </button>
+                  <span className="text-[10px] text-white/50 font-mono hidden sm:block">{Math.floor(progress * 0.22)}:00 / 22:10</span>
+                  <div className="flex-1" />
+                  {isMobile && mode === "course" && (
+                    <button onClick={() => setMobileLessonsOpen(true)} className="text-white/70 hover:text-white transition-colors p-1">
+                      <Layers className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button className="text-white/70 hover:text-white transition-colors p-1 hidden sm:block"><Settings className="w-4 h-4" /></button>
+                  <button className="text-white/70 hover:text-white transition-colors p-1"><Maximize className="w-4 h-4" /></button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Drag Handle */}
-        {mode === "ide" && (
+            {/* Notes textarea on mobile notes mode */}
+            {isMobile && mode === "notes" && (
+              <div className={cn("border-t border-white/[0.06] flex-1 flex flex-col", glassBg)}>
+                <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between">
+                  <h3 className="text-xs font-semibold text-gray-300">📝 Course Notes</h3>
+                  <span className="text-[9px] text-gray-600">Auto-saved</span>
+                </div>
+                <textarea
+                  value={notesContent}
+                  onChange={(e) => setNotesContent(e.target.value)}
+                  className="flex-1 p-3 bg-transparent text-sm text-gray-300 placeholder:text-gray-600 focus:outline-none resize-none font-mono leading-relaxed"
+                  placeholder="Start typing your notes..."
+                />
+              </div>
+            )}
+
+            {/* Tabs below video (hide on mobile notes mode to save space) */}
+            {!(isMobile && mode === "notes") && (
+              <div className={cn("border-t border-white/[0.06] flex-shrink-0", glassBg)}>
+                <div className="flex gap-0 px-3 md:px-4 border-b border-white/[0.06] overflow-x-auto scrollbar-none">
+                  {(["overview", "notes", "resources", "discussion"] as NavTab[]).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setNavTab(tab)}
+                      className={cn("px-3 md:px-4 py-2.5 text-xs font-medium transition-all relative whitespace-nowrap",
+                        navTab === tab ? "text-blue-400" : "text-gray-500 hover:text-gray-300"
+                      )}
+                    >
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                      {navTab === tab && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />}
+                    </button>
+                  ))}
+                  {!isMobile && mode !== "course" && (
+                    <button onClick={() => setSidebarOpen(!sidebarOpen)} className="ml-auto text-gray-500 hover:text-gray-300 text-xs flex items-center gap-1">
+                      {sidebarOpen ? <ChevronLeft className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                      Lessons
+                    </button>
+                  )}
+                  {isMobile && mode === "course" && (
+                    <button onClick={() => setMobileLessonsOpen(true)} className="ml-auto text-gray-500 hover:text-gray-300 text-xs flex items-center gap-1 whitespace-nowrap">
+                      <Layers className="w-3 h-3" />
+                      Lessons
+                    </button>
+                  )}
+                </div>
+                <div className={cn("p-3 md:p-4 overflow-y-auto text-xs text-gray-400", isMobile ? "max-h-28" : "max-h-32")}>
+                  {navTab === "overview" && <p>Master React Hooks from the ground up. This comprehensive module covers useState, useEffect, useContext, useReducer, and custom hooks with real-world projects.</p>}
+                  {navTab === "notes" && <textarea value={notesContent} onChange={(e) => setNotesContent(e.target.value)} className="w-full h-20 bg-transparent text-gray-300 focus:outline-none resize-none font-mono" placeholder="Take notes..." />}
+                  {navTab === "resources" && (
+                    <div className="space-y-2">
+                      {["Lecture Slides.pdf", "Code Samples.zip", "Cheat Sheet.md"].map((f) => (
+                        <div key={f} className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] active:bg-white/[0.06] cursor-pointer transition-colors">
+                          <Download className="w-3 h-3 text-blue-400" />
+                          <span className="text-gray-300">{f}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {navTab === "discussion" && (
+                    <div className="space-y-2">
+                      <div className="flex gap-2 items-start p-2 rounded-lg bg-white/[0.02]">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-[9px] text-white font-bold flex-shrink-0">J</div>
+                        <div>
+                          <span className="text-gray-200 font-medium">Jane</span>
+                          <p className="text-gray-500 mt-0.5">Great explanation of useEffect cleanup!</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Drag Handle - desktop only */}
+        {!isMobile && mode === "ide" && (
           <div onMouseDown={handleMouseDown} className="w-1.5 flex-shrink-0 cursor-col-resize flex items-center justify-center hover:bg-blue-500/20 transition-colors group/drag relative z-10">
             <div className="w-0.5 h-8 rounded-full bg-white/10 group-hover/drag:bg-blue-400/50 transition-colors" />
           </div>
         )}
 
         {/* Code Editor (IDE mode) */}
-        {mode === "ide" && (
-          <div className="flex flex-col border-l border-white/[0.06]" style={{ width: `${editorWidth}%` }}>
+        {mode === "ide" && (!isMobile || mobilePanel === "editor") && (
+          <div
+            className={cn("flex flex-col", isMobile ? "flex-1" : "border-l border-white/[0.06]")}
+            style={!isMobile ? { width: `${editorWidth}%` } : undefined}
+          >
             {/* Editor Tabs */}
-            <div className={cn("flex items-center h-9 border-b border-white/[0.06] px-2 gap-1", glassBg)}>
+            <div className={cn("flex items-center h-9 border-b border-white/[0.06] px-2 gap-1 overflow-x-auto scrollbar-none flex-shrink-0", glassBg)}>
               {["App.jsx", "styles.css", "utils.js"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setEditorTab(tab)}
-                  className={cn("px-3 py-1.5 rounded-lg text-[10px] font-medium flex items-center gap-1.5 transition-all",
+                  className={cn("px-3 py-1.5 rounded-lg text-[10px] font-medium flex items-center gap-1.5 transition-all whitespace-nowrap flex-shrink-0",
                     editorTab === tab ? "bg-white/[0.06] text-gray-200" : "text-gray-500 hover:text-gray-300"
                   )}
                 >
@@ -681,14 +812,14 @@ export default function VideoPlayer() {
                 </button>
               ))}
               <div className="flex-1" />
-              <button className="text-gray-500 hover:text-gray-300 transition-colors"><Plus className="w-3.5 h-3.5" /></button>
+              <button className="text-gray-500 hover:text-gray-300 transition-colors flex-shrink-0"><Plus className="w-3.5 h-3.5" /></button>
             </div>
 
             {/* Code Area */}
-            <div className="flex-1 overflow-auto relative" style={{ background: "#0d1117" }}>
-              <div className="flex">
+            <div className="flex-1 overflow-auto relative min-h-0" style={{ background: "#0d1117" }}>
+              <div className="flex min-h-full">
                 {/* Line numbers */}
-                <div className="py-3 px-3 text-right select-none flex-shrink-0">
+                <div className={cn("py-3 text-right select-none flex-shrink-0", isMobile ? "px-2" : "px-3")}>
                   {code.split("\n").map((_, i) => (
                     <div key={i} className="text-[10px] leading-5 text-gray-600 font-mono">{i + 1}</div>
                   ))}
@@ -699,16 +830,21 @@ export default function VideoPlayer() {
                     value={code}
                     onChange={(e) => {
                       setCode(e.target.value);
-                      // mock autocomplete
                       if (e.target.value.endsWith("use")) setShowAutocomplete(true);
                       else setShowAutocomplete(false);
                     }}
-                    className="absolute inset-0 w-full h-full py-3 pr-4 bg-transparent text-[11px] leading-5 text-gray-300 font-mono focus:outline-none resize-none caret-blue-400"
+                    className={cn("absolute inset-0 w-full h-full py-3 pr-3 md:pr-4 bg-transparent leading-5 text-gray-300 font-mono focus:outline-none resize-none caret-blue-400",
+                      isMobile ? "text-[12px]" : "text-[11px]"
+                    )}
                     spellCheck={false}
+                    autoCapitalize="off"
+                    autoCorrect="off"
                   />
                   {/* Autocomplete Mock */}
                   {showAutocomplete && (
-                    <div className={cn("absolute left-32 top-20 w-52 rounded-xl overflow-hidden shadow-2xl shadow-black/60 z-20 animate-scale-in", glass, "bg-[#161b22]/95")}>
+                    <div className={cn("absolute left-4 md:left-32 top-20 rounded-xl overflow-hidden shadow-2xl shadow-black/60 z-20 animate-scale-in", glass, "bg-[#161b22]/95",
+                      isMobile ? "w-44" : "w-52"
+                    )}>
                       <div className="px-3 py-1.5 border-b border-white/[0.06] flex items-center gap-1.5">
                         <Sparkles className="w-3 h-3 text-purple-400" />
                         <span className="text-[9px] text-purple-400 font-medium">AI Suggest</span>
@@ -717,7 +853,7 @@ export default function VideoPlayer() {
                         <button
                           key={h}
                           onClick={() => { setShowAutocomplete(false); }}
-                          className="w-full px-3 py-1.5 text-[11px] text-left text-gray-300 hover:bg-blue-500/10 flex items-center gap-2 font-mono transition-colors"
+                          className="w-full px-3 py-2 text-[11px] text-left text-gray-300 hover:bg-blue-500/10 active:bg-blue-500/20 flex items-center gap-2 font-mono transition-colors"
                         >
                           <span className="text-blue-400">⨍</span> {h}
                         </button>
@@ -729,37 +865,47 @@ export default function VideoPlayer() {
             </div>
 
             {/* Compile Button */}
-            <div className={cn("px-3 py-2 border-t border-white/[0.06] flex items-center gap-2", glassBg)}>
+            <div className={cn("px-3 py-2 border-t border-white/[0.06] flex items-center gap-2 flex-shrink-0", glassBg)}>
               <button
                 onClick={runCode}
                 disabled={compiling}
                 className={cn(
-                  "h-8 px-5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all duration-300",
+                  "rounded-xl text-xs font-semibold flex items-center gap-2 transition-all duration-300 active:scale-95",
+                  isMobile ? "h-10 px-4 flex-1 justify-center" : "h-8 px-5",
                   compiling
                     ? "bg-gray-700 text-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-[1.02]"
+                    : "bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 md:hover:scale-[1.02]"
                 )}
               >
-                {compiling ? <RotateCcw className="w-3 h-3 animate-spin" /> : <PlayIcon className="w-3 h-3" />}
+                {compiling ? <RotateCcw className="w-3.5 h-3.5 animate-spin" /> : <PlayIcon className="w-3.5 h-3.5" />}
                 {compiling ? "Compiling..." : "Compile & Run"}
               </button>
-              <button onClick={() => setTerminalOpen(!terminalOpen)} className="h-8 px-3 rounded-xl bg-white/[0.04] border border-white/[0.06] text-gray-400 text-xs font-medium hover:text-gray-200 flex items-center gap-1.5 transition-colors">
-                <Terminal className="w-3 h-3" />
-                Terminal
-              </button>
-              <div className="flex-1" />
-              <button className="text-gray-500 hover:text-gray-300 transition-colors"><Copy className="w-3.5 h-3.5" /></button>
+              {!isMobile && (
+                <button onClick={() => setTerminalOpen(!terminalOpen)} className="h-8 px-3 rounded-xl bg-white/[0.04] border border-white/[0.06] text-gray-400 text-xs font-medium hover:text-gray-200 flex items-center gap-1.5 transition-colors">
+                  <Terminal className="w-3 h-3" />
+                  Terminal
+                </button>
+              )}
+              {isMobile && (
+                <button onClick={() => setTerminalOpen(!terminalOpen)} className={cn("h-10 w-10 rounded-xl flex items-center justify-center transition-colors",
+                  terminalOpen ? "bg-blue-500/20 text-blue-400" : "bg-white/[0.04] border border-white/[0.06] text-gray-400"
+                )}>
+                  <Terminal className="w-4 h-4" />
+                </button>
+              )}
+              <div className="flex-1 hidden md:block" />
+              <button className="text-gray-500 hover:text-gray-300 transition-colors hidden md:block"><Copy className="w-3.5 h-3.5" /></button>
             </div>
 
             {/* Terminal */}
             {terminalOpen && (
-              <div className={cn("border-t border-white/[0.06] transition-all duration-300", "bg-[#0a0e14]")} style={{ height: 160 }}>
+              <div className={cn("border-t border-white/[0.06] transition-all duration-300 flex-shrink-0", "bg-[#0a0e14]")} style={{ height: isMobile ? 140 : 160 }}>
                 <div className="flex items-center h-7 px-3 border-b border-white/[0.06] bg-white/[0.02]">
                   <Terminal className="w-3 h-3 text-gray-500 mr-2" />
                   <span className="text-[10px] text-gray-500 font-medium">Output</span>
                   <div className="flex-1" />
-                  <button onClick={() => setTerminalOutput([])} className="text-gray-600 hover:text-gray-300 transition-colors"><RotateCcw className="w-3 h-3" /></button>
-                  <button onClick={() => setTerminalOpen(false)} className="text-gray-600 hover:text-gray-300 ml-2 transition-colors"><X className="w-3 h-3" /></button>
+                  <button onClick={() => setTerminalOutput([])} className="text-gray-600 hover:text-gray-300 transition-colors p-1"><RotateCcw className="w-3 h-3" /></button>
+                  <button onClick={() => setTerminalOpen(false)} className="text-gray-600 hover:text-gray-300 ml-1 transition-colors p-1"><X className="w-3 h-3" /></button>
                 </div>
                 <div className="p-3 overflow-y-auto h-[calc(100%-28px)] font-mono text-[10px] leading-5">
                   {terminalOutput.length === 0 ? (
@@ -779,6 +925,43 @@ export default function VideoPlayer() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Mobile IDE - Lessons panel */}
+        {isMobile && mode === "ide" && mobilePanel === "lessons" && (
+          <div className={cn("flex-1 flex flex-col", glassBg)}>
+            <div className="p-4 border-b border-white/[0.06]">
+              <h2 className="text-sm font-bold text-gray-200">React Masterclass</h2>
+              <p className="text-[10px] text-gray-500 mt-1">8 lessons • 2h 25m</p>
+              <div className="mt-3 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500" style={{ width: "25%" }} />
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2">
+              {lessons.map((lesson) => (
+                <button
+                  key={lesson.id}
+                  onClick={() => { if (!lesson.locked) { setActiveLesson(lesson.id); setMobilePanel("video"); } }}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-left transition-all duration-200",
+                    activeLesson === lesson.id ? "bg-blue-500/10 border border-blue-500/20" : "active:bg-white/[0.04]",
+                    lesson.locked && "opacity-40 cursor-not-allowed"
+                  )}
+                >
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold",
+                    lesson.completed ? "bg-emerald-500/20 text-emerald-400" : activeLesson === lesson.id ? "bg-blue-500/20 text-blue-400" : "bg-white/[0.04] text-gray-500"
+                  )}>
+                    {lesson.completed ? <Check className="w-4 h-4" /> : lesson.locked ? <Lock className="w-3.5 h-3.5" /> : lesson.id}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={cn("text-sm font-medium truncate", activeLesson === lesson.id ? "text-blue-400" : "text-gray-300")}>{lesson.title}</p>
+                    <span className="text-[10px] text-gray-600">{lesson.duration}</span>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 text-gray-600 flex-shrink-0" />
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
