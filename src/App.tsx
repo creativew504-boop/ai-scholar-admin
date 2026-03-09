@@ -2,24 +2,32 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/layout/Layout";
-import Dashboard from "./pages/Dashboard";
-import Courses from "./pages/Courses";
-import Students from "./pages/Students";
-import Schedule from "./pages/Schedule";
-import Reports from "./pages/Reports";
-import Payments from "./pages/Payments";
-import Settings from "./pages/Settings";
-import VideoPlayer from "./pages/VideoPlayer";
+import StudentDashboard from "./pages/StudentDashboard";
+import MentorDashboard from "./pages/MentorDashboard";
+import StudentCourses from "./pages/StudentCourses";
+import StudentAssignments from "./pages/StudentAssignments";
+import StudentLiveClasses from "./pages/StudentLiveClasses";
+import StudentMentors from "./pages/StudentMentors";
+import StudentCertificates from "./pages/StudentCertificates";
+import StudentDiscussions from "./pages/StudentDiscussions";
+import StudentMessages from "./pages/StudentMessages";
+import StudentNotifications from "./pages/StudentNotifications";
+import StudentCalendar from "./pages/StudentCalendar";
+import StudentProgress from "./pages/StudentProgress";
+import StudentPaymentsPage from "./pages/StudentPaymentsPage";
+import StudentProfile from "./pages/StudentProfile";
+import SharedSettings from "./pages/SharedSettings";
+import MentorStudents from "./pages/MentorStudents";
+import MentorCourses from "./pages/MentorCourses";
+import MentorAssignmentsReview from "./pages/MentorAssignmentsReview";
+import MentorSessions from "./pages/MentorSessions";
+import MentorMessages from "./pages/MentorMessages";
+import MentorAnalytics from "./pages/MentorAnalytics";
+import MentorSchedule from "./pages/MentorSchedule";
+import MentorProfile from "./pages/MentorProfile";
 import NotFound from "./pages/NotFound";
-import AddCourse from "./pages/AddCourse";
-import CourseCategories from "./pages/CourseCategories";
-import Batches from "./pages/Batches";
-import StudentIdCards from "./pages/StudentIdCards";
-import StudentPayments from "./pages/StudentPayments";
-import HelpCenter from "./pages/HelpCenter";
-import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -30,21 +38,33 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout><Dashboard /></Layout>} />
-          <Route path="/courses" element={<Layout><Courses /></Layout>} />
-          <Route path="/courses/add" element={<Layout><AddCourse /></Layout>} />
-          <Route path="/courses/categories" element={<Layout><CourseCategories /></Layout>} />
-          <Route path="/courses/batches" element={<Layout><Batches /></Layout>} />
-          <Route path="/students" element={<Layout><Students /></Layout>} />
-          <Route path="/students/id-cards" element={<Layout><StudentIdCards /></Layout>} />
-          <Route path="/students/payments" element={<Layout><StudentPayments /></Layout>} />
-          <Route path="/schedule" element={<Layout><Schedule /></Layout>} />
-          <Route path="/reports" element={<Layout><Reports /></Layout>} />
-          <Route path="/payments" element={<Layout><Payments /></Layout>} />
-          <Route path="/settings" element={<Layout><Settings /></Layout>} />
-          <Route path="/notifications" element={<Layout><Notifications /></Layout>} />
-          <Route path="/help" element={<Layout><HelpCenter /></Layout>} />
-          <Route path="/player" element={<VideoPlayer />} />
+          <Route path="/" element={<Navigate to="/student" replace />} />
+          {/* Student Routes */}
+          <Route path="/student" element={<Layout><StudentDashboard /></Layout>} />
+          <Route path="/student/courses" element={<Layout><StudentCourses /></Layout>} />
+          <Route path="/student/assignments" element={<Layout><StudentAssignments /></Layout>} />
+          <Route path="/student/live-classes" element={<Layout><StudentLiveClasses /></Layout>} />
+          <Route path="/student/mentors" element={<Layout><StudentMentors /></Layout>} />
+          <Route path="/student/certificates" element={<Layout><StudentCertificates /></Layout>} />
+          <Route path="/student/discussions" element={<Layout><StudentDiscussions /></Layout>} />
+          <Route path="/student/messages" element={<Layout><StudentMessages /></Layout>} />
+          <Route path="/student/notifications" element={<Layout><StudentNotifications /></Layout>} />
+          <Route path="/student/calendar" element={<Layout><StudentCalendar /></Layout>} />
+          <Route path="/student/progress" element={<Layout><StudentProgress /></Layout>} />
+          <Route path="/student/payments" element={<Layout><StudentPaymentsPage /></Layout>} />
+          <Route path="/student/profile" element={<Layout><StudentProfile /></Layout>} />
+          <Route path="/student/settings" element={<Layout><SharedSettings /></Layout>} />
+          {/* Mentor Routes */}
+          <Route path="/mentor" element={<Layout><MentorDashboard /></Layout>} />
+          <Route path="/mentor/students" element={<Layout><MentorStudents /></Layout>} />
+          <Route path="/mentor/courses" element={<Layout><MentorCourses /></Layout>} />
+          <Route path="/mentor/assignments" element={<Layout><MentorAssignmentsReview /></Layout>} />
+          <Route path="/mentor/sessions" element={<Layout><MentorSessions /></Layout>} />
+          <Route path="/mentor/messages" element={<Layout><MentorMessages /></Layout>} />
+          <Route path="/mentor/analytics" element={<Layout><MentorAnalytics /></Layout>} />
+          <Route path="/mentor/schedule" element={<Layout><MentorSchedule /></Layout>} />
+          <Route path="/mentor/profile" element={<Layout><MentorProfile /></Layout>} />
+          <Route path="/mentor/settings" element={<Layout><SharedSettings /></Layout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
