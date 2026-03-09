@@ -3,70 +3,58 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, Users, Calendar, BarChart3,
   CreditCard, Settings, ChevronLeft, ChevronRight, ChevronDown,
-  GraduationCap, Bell, HelpCircle, LogOut, PlusCircle, FolderOpen,
-  Layers, ListChecks, UserCircle, IdCard, Wallet, Menu
+  GraduationCap, Bell, HelpCircle, LogOut, Menu,
+  ClipboardList, Video, Award, MessageSquare, Mail,
+  TrendingUp, UserCheck, Clock, Star, X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-interface SubItem {
-  label: string;
-  path: string;
-  icon: React.ElementType;
-}
 
 interface NavItem {
   icon: React.ElementType;
   label: string;
   path: string;
-  children?: SubItem[];
+  children?: { icon: React.ElementType; label: string; path: string }[];
 }
 
-const navItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-  {
-    icon: BookOpen, label: "Courses", path: "/courses",
-    children: [
-      { icon: PlusCircle, label: "Add Course", path: "/courses/add" },
-      { icon: FolderOpen, label: "Categories", path: "/courses/categories" },
-      { icon: Layers, label: "Batches", path: "/courses/batches" },
-      { icon: ListChecks, label: "All Courses", path: "/courses" },
-    ],
-  },
-  {
-    icon: Users, label: "Students", path: "/students",
-    children: [
-      { icon: UserCircle, label: "Student List", path: "/students" },
-      { icon: IdCard, label: "ID Cards", path: "/students/id-cards" },
-      { icon: Wallet, label: "Payments", path: "/students/payments" },
-    ],
-  },
-  { icon: Calendar, label: "Schedule", path: "/schedule" },
-  { icon: BarChart3, label: "Reports", path: "/reports" },
-  { icon: CreditCard, label: "Payments", path: "/payments" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+const studentNav: NavItem[] = [
+  { icon: LayoutDashboard, label: "Dashboard", path: "/student" },
+  { icon: BookOpen, label: "My Courses", path: "/student/courses" },
+  { icon: ClipboardList, label: "Assignments", path: "/student/assignments" },
+  { icon: Video, label: "Live Classes", path: "/student/live-classes" },
+  { icon: UserCheck, label: "Mentors", path: "/student/mentors" },
+  { icon: Award, label: "Certificates", path: "/student/certificates" },
+  { icon: MessageSquare, label: "Discussions", path: "/student/discussions" },
+  { icon: Mail, label: "Messages", path: "/student/messages" },
+  { icon: Bell, label: "Notifications", path: "/student/notifications" },
+  { icon: Calendar, label: "Calendar", path: "/student/calendar" },
+  { icon: TrendingUp, label: "Progress", path: "/student/progress" },
+  { icon: CreditCard, label: "Payments", path: "/student/payments" },
+  { icon: Users, label: "Profile", path: "/student/profile" },
+  { icon: Settings, label: "Settings", path: "/student/settings" },
 ];
 
-const bottomItems = [
-  { icon: Bell, label: "Notifications", path: "/notifications" },
-  { icon: HelpCircle, label: "Help Center", path: "/help" },
+const mentorNav: NavItem[] = [
+  { icon: LayoutDashboard, label: "Dashboard", path: "/mentor" },
+  { icon: Users, label: "My Students", path: "/mentor/students" },
+  { icon: BookOpen, label: "Courses", path: "/mentor/courses" },
+  { icon: ClipboardList, label: "Assignments Review", path: "/mentor/assignments" },
+  { icon: Clock, label: "Sessions", path: "/mentor/sessions" },
+  { icon: Mail, label: "Messages", path: "/mentor/messages" },
+  { icon: BarChart3, label: "Analytics", path: "/mentor/analytics" },
+  { icon: Calendar, label: "Schedule", path: "/mentor/schedule" },
+  { icon: Users, label: "Profile", path: "/mentor/profile" },
+  { icon: Settings, label: "Settings", path: "/mentor/settings" },
 ];
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [role, setRole] = useState<"student" | "mentor">("student");
   const location = useLocation();
   const isMobile = useIsMobile();
 
-  const toggleMenu = (label: string) => {
-    setOpenMenus((prev) => ({ ...prev, [label]: !prev[label] }));
-  };
-
-  const isItemActive = (item: NavItem) =>
-    location.pathname === item.path ||
-    (item.path !== "/" && location.pathname.startsWith(item.path)) ||
-    item.children?.some((c) => location.pathname === c.path);
+  const navItems = role === "student" ? studentNav : mentorNav;
 
   const sidebarContent = (
     <>
@@ -79,19 +67,49 @@ export default function Sidebar() {
           <GraduationCap className="w-5 h-5 text-primary-foreground" />
         </div>
         {(!collapsed || isMobile) && (
-          <div className="animate-fade-in-up overflow-hidden">
+          <div className="overflow-hidden">
             <p className="text-sm font-bold text-foreground leading-tight whitespace-nowrap">AI Scholar</p>
-            <p className="text-[10px] text-muted-foreground whitespace-nowrap">Admin Portal</p>
+            <p className="text-[10px] text-muted-foreground whitespace-nowrap">Learning Platform</p>
           </div>
         )}
         {isMobile && (
           <button onClick={() => setMobileOpen(false)} className="ml-auto p-1 rounded-lg hover:bg-accent">
-            <ChevronLeft className="w-5 h-5" />
+            <X className="w-5 h-5" />
           </button>
         )}
       </div>
 
-      {/* Toggle Button (desktop) */}
+      {/* Role Toggle */}
+      {(!collapsed || isMobile) && (
+        <div className="px-3 pt-4 pb-2">
+          <div className="flex rounded-lg bg-muted p-1">
+            <button
+              onClick={() => setRole("student")}
+              className={cn(
+                "flex-1 text-xs font-semibold py-1.5 rounded-md transition-all duration-200",
+                role === "student"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Student
+            </button>
+            <button
+              onClick={() => setRole("mentor")}
+              className={cn(
+                "flex-1 text-xs font-semibold py-1.5 rounded-md transition-all duration-200",
+                role === "mentor"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Mentor
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Collapse toggle (desktop) */}
       {!isMobile && (
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -105,148 +123,49 @@ export default function Sidebar() {
         </button>
       )}
 
-      {/* Nav Items */}
-      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto scrollbar-thin">
+      {/* Nav */}
+      <nav className="flex-1 py-3 px-3 space-y-0.5 overflow-y-auto scrollbar-thin">
         {(!collapsed || isMobile) && (
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-3 mb-3">
-            Main Menu
+            {role === "student" ? "Student Menu" : "Mentor Menu"}
           </p>
         )}
-        {navItems.map((item, index) => {
-          const isActive = isItemActive(item);
-          const hasChildren = item.children && item.children.length > 0;
-          const isOpen = openMenus[item.label] || false;
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
           const showExpanded = !collapsed || isMobile;
-
           return (
-            <div key={item.path + item.label} style={{ animationDelay: `${index * 50}ms` }}>
-              {/* Parent item */}
-              {hasChildren && showExpanded ? (
-                <button
-                  onClick={() => toggleMenu(item.label)}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
-                    "transition-all duration-200 group relative",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                  )}
-                >
-                  <item.icon className={cn("w-5 h-5 flex-shrink-0 transition-colors", isActive && "text-primary")} />
-                  <span className="whitespace-nowrap flex-1 text-left">{item.label}</span>
-                  <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", isOpen && "rotate-180")} />
-                </button>
-              ) : (
-                <NavLink
-                  to={item.path}
-                  onClick={() => isMobile && setMobileOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
-                    "transition-all duration-200 group relative",
-                    !showExpanded && "justify-center px-2",
-                    isActive
-                      ? "bg-primary/10 text-primary border-l-4 border-primary rounded-l-none"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                  )}
-                >
-                  <item.icon className={cn("w-5 h-5 flex-shrink-0 transition-colors", isActive && "text-primary")} />
-                  {showExpanded && <span className="whitespace-nowrap">{item.label}</span>}
-                  {!showExpanded && (
-                    <div className="absolute left-full ml-2 px-2 py-1 bg-foreground text-background text-xs rounded-md
-                      opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
-                      {item.label}
-                    </div>
-                  )}
-                  {isActive && showExpanded && !hasChildren && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
-                  )}
-                </NavLink>
+            <NavLink
+              key={item.path}
+              to={item.path}
+              onClick={() => isMobile && setMobileOpen(false)}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group relative",
+                !showExpanded && "justify-center px-2",
+                isActive
+                  ? "bg-primary/10 text-primary border-l-4 border-primary rounded-l-none"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
               )}
-
-              {/* Children (collapsible) */}
-              {hasChildren && showExpanded && (
-                <div
-                  className={cn(
-                    "overflow-hidden transition-all duration-300 ease-in-out",
-                    isOpen ? "max-h-60 opacity-100 mt-1" : "max-h-0 opacity-0"
-                  )}
-                >
-                  <div className="ml-4 pl-3 border-l-2 border-border space-y-0.5">
-                    {item.children!.map((child) => {
-                      const childActive = location.pathname === child.path;
-                      return (
-                        <NavLink
-                          key={child.path + child.label}
-                          to={child.path}
-                          onClick={() => isMobile && setMobileOpen(false)}
-                          className={cn(
-                            "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200",
-                            childActive
-                              ? "bg-primary/10 text-primary"
-                              : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                          )}
-                        >
-                          <child.icon className={cn("w-4 h-4 flex-shrink-0", childActive && "text-primary")} />
-                          <span>{child.label}</span>
-                          {childActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
-                        </NavLink>
-                      );
-                    })}
-                  </div>
+            >
+              <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-primary")} />
+              {showExpanded && <span className="whitespace-nowrap">{item.label}</span>}
+              {!showExpanded && (
+                <div className="absolute left-full ml-2 px-2 py-1 bg-foreground text-background text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+                  {item.label}
                 </div>
               )}
-
-              {/* Collapsed tooltip for parent with children */}
-              {hasChildren && !showExpanded && (
-                <NavLink
-                  to={item.path}
-                  className={cn(
-                    "flex items-center justify-center px-2 py-2.5 rounded-lg text-sm font-medium",
-                    "transition-all duration-200 group relative",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                  )}
-                >
-                  <item.icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-primary")} />
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-foreground text-background text-xs rounded-md
-                    opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
-                    {item.label}
-                  </div>
-                </NavLink>
-              )}
-            </div>
+              {isActive && showExpanded && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+            </NavLink>
           );
         })}
       </nav>
 
-      {/* Bottom Items */}
-      <div className="py-4 px-3 space-y-1 border-t border-border">
-        {bottomItems.map((item) => (
-          <NavLink
-            key={item.label}
-            to={item.path}
-            onClick={() => isMobile && setMobileOpen(false)}
-            className={({ isActive }) => cn(
-              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
-              "transition-all duration-200",
-              !collapsed || isMobile ? "" : "justify-center px-2",
-              isActive
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-accent hover:text-foreground"
-            )}
-          >
-            <item.icon className="w-5 h-5 flex-shrink-0" />
-            {(!collapsed || isMobile) && <span>{item.label}</span>}
-          </NavLink>
-        ))}
-        <button
-          className={cn(
-            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium",
-            "text-destructive hover:bg-destructive/10 transition-all duration-200",
-            !collapsed || isMobile ? "" : "justify-center px-2"
-          )}
-        >
+      {/* Bottom */}
+      <div className="py-3 px-3 border-t border-border">
+        <button className={cn(
+          "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium",
+          "text-destructive hover:bg-destructive/10 transition-all duration-200",
+          !collapsed || isMobile ? "" : "justify-center px-2"
+        )}>
           <LogOut className="w-5 h-5 flex-shrink-0" />
           {(!collapsed || isMobile) && <span>Logout</span>}
         </button>
@@ -254,7 +173,6 @@ export default function Sidebar() {
     </>
   );
 
-  // Mobile: overlay sidebar
   if (isMobile) {
     return (
       <>
@@ -276,7 +194,6 @@ export default function Sidebar() {
     );
   }
 
-  // Desktop
   return (
     <aside
       className={cn(
